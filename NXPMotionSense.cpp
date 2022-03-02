@@ -12,8 +12,8 @@ bool NXPMotionSense::begin()
 	uint8_t i;
 	uint16_t crc;
 
-	Wire.begin();
-	Wire.setClock(400000);
+	Wire2.begin();
+	Wire2.setClock(400000);
 
 	memset(accel_mag_raw, 0, sizeof(accel_mag_raw));
 	memset(gyro_raw, 0, sizeof(gyro_raw));
@@ -71,21 +71,21 @@ void NXPMotionSense::update()
 
 static bool write_reg(uint8_t i2c, uint8_t addr, uint8_t val)
 {
-	Wire.beginTransmission(i2c);
-	Wire.write(addr);
-	Wire.write(val);
-	return Wire.endTransmission() == 0;
+	Wire2.beginTransmission(i2c);
+	Wire2.write(addr);
+	Wire2.write(val);
+	return Wire2.endTransmission() == 0;
 }
 
 static bool read_regs(uint8_t i2c, uint8_t addr, uint8_t *data, uint8_t num)
 {
-	Wire.beginTransmission(i2c);
-	Wire.write(addr);
-	if (Wire.endTransmission(false) != 0) return false;
-	Wire.requestFrom(i2c, num);
-	if (Wire.available() != num) return false;
+	Wire2.beginTransmission(i2c);
+	Wire2.write(addr);
+	if (Wire2.endTransmission(false) != 0) return false;
+	Wire2.requestFrom(i2c, num);
+	if (Wire2.available() != num) return false;
 	while (num > 0) {
-		*data++ = Wire.read();
+		*data++ = Wire2.read();
 		num--;
 	}
 	return true;
@@ -93,10 +93,10 @@ static bool read_regs(uint8_t i2c, uint8_t addr, uint8_t *data, uint8_t num)
 
 static bool read_regs(uint8_t i2c, uint8_t *data, uint8_t num)
 {
-	Wire.requestFrom(i2c, num);
-	if (Wire.available() != num) return false;
+	Wire2.requestFrom(i2c, num);
+	if (Wire2.available() != num) return false;
 	while (num > 0) {
-		*data++ = Wire.read();
+		*data++ = Wire2.read();
 		num--;
 	}
 	return true;
