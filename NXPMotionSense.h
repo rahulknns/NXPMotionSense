@@ -1,5 +1,5 @@
-#ifndef _NXP_Motion_Sensors_
-#define _NXP_Motion_Sensors_
+#ifndef SENSOR_FUSION_H
+#define SENSOR_FUSION_H
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -10,97 +10,7 @@
 #define DEG_PER_SEC_PER_COUNT  0.0625f  // = 1/16
 #define UT_PER_COUNT           0.1f
 
-class NXPMotionSense {
-public:
-	bool begin();
-	bool available() {
-		update();
-		if (newdata) return true;
-		return false;
-	}
-	void readMotionSensor(int& ax, int& ay, int& az, int& gx, int& gy, int& gz) {
-		if (!newdata) update();
-		newdata = 0;
-		ax = accel_mag_raw[0];
-		ay = accel_mag_raw[1];
-		az = accel_mag_raw[2];
-		gx = gyro_raw[0];
-		gy = gyro_raw[1];
-		gz = gyro_raw[2];
-	}
-	void readMotionSensor(int& ax, int& ay, int& az, int& gx, int& gy, int& gz, int& mx, int& my, int& mz) {
-		if (!newdata) update();
-		newdata = 0;
-		ax = accel_mag_raw[0];
-		ay = accel_mag_raw[1];
-		az = accel_mag_raw[2];
-		mx = accel_mag_raw[3];
-		my = accel_mag_raw[4];
-		mz = accel_mag_raw[5];
-		gx = gyro_raw[0];
-		gy = gyro_raw[1];
-		gz = gyro_raw[2];
-	}
-	void readMotionSensor(float& ax, float& ay, float& az, float& gx, float& gy, float& gz) {
-		if (!newdata) update();
-		newdata = 0;
-		ax = (float)accel_mag_raw[0] * G_PER_COUNT;
-		ay = (float)accel_mag_raw[1] * G_PER_COUNT;
-		az = (float)accel_mag_raw[2] * G_PER_COUNT;
-		gx = (float)gyro_raw[0] * DEG_PER_SEC_PER_COUNT;
-		gy = (float)gyro_raw[1] * DEG_PER_SEC_PER_COUNT;
-		gz = (float)gyro_raw[2] * DEG_PER_SEC_PER_COUNT;
-	}
-	void readMotionSensor(float& ax, float& ay, float& az, float& gx, float& gy, float& gz, float& mx, float& my, float& mz) {
-		if (!newdata) update();
-		newdata = 0;
-		ax = (float)accel_mag_raw[0] * G_PER_COUNT - cal[0];
-		ay = (float)accel_mag_raw[1] * G_PER_COUNT - cal[1];
-		az = (float)accel_mag_raw[2] * G_PER_COUNT - cal[2];
-		gx = (float)gyro_raw[0] * DEG_PER_SEC_PER_COUNT - cal[3];
-		gy = (float)gyro_raw[1] * DEG_PER_SEC_PER_COUNT - cal[4];
-		gz = (float)gyro_raw[2] * DEG_PER_SEC_PER_COUNT - cal[5];
-		float x = (float)accel_mag_raw[3] * UT_PER_COUNT - cal[6];
-		float y = (float)accel_mag_raw[4] * UT_PER_COUNT - cal[7];
-		float z = (float)accel_mag_raw[5] * UT_PER_COUNT - cal[8];
-		mx = x * cal[10] + y * cal[13] + z * cal[14];
-		my = x * cal[13] + y * cal[11] + z * cal[15];
-		mz = x * cal[14] + y * cal[15] + z * cal[12];
-	}
-
-	bool writeCalibration(const void *data);
-	void getCalibration(float *offsets, float *softiron=NULL, float *fieldstrength=NULL) {
-		if (offsets != NULL) {
-			memcpy(offsets, cal, 36);
-		}
-		if (softiron != NULL) {
-			*softiron++ = cal[10];
-			*softiron++ = cal[13];
-			*softiron++ = cal[14];
-			*softiron++ = cal[13];
-			*softiron++ = cal[11];
-			*softiron++ = cal[15];
-			*softiron++ = cal[14];
-			*softiron++ = cal[15];
-			*softiron++ = cal[12];
-		}
-		if (fieldstrength != NULL) *fieldstrength = cal[9];
-	}
-private:
-	void update();
-	bool FXOS8700_begin();
-	bool FXAS21002_begin();
-	bool MPL3115_begin();
-	bool FXOS8700_read(int16_t *data);
-	bool FXAS21002_read(int16_t *data);
-	bool MPL3115_read(int32_t *altitude, int16_t *temperature);
-	float cal[16]; // 0-8=offsets, 9=field strength, 10-15=soft iron map
-	int16_t accel_mag_raw[6];
-	int16_t gyro_raw[3];
-	int16_t temperature_raw;
-	uint8_t newdata;
-};
-
+ 
 
 class NXPSensorFusion {
 public:
